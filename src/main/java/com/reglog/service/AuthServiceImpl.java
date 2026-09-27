@@ -124,6 +124,7 @@ public class AuthServiceImpl implements AuthService {
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
         cookie.setAttribute("SameSite", cookieSameSite);
+        cookie.setAttribute("Partitioned", "");
 
         response.addCookie(cookie);
     }
@@ -136,6 +137,7 @@ public class AuthServiceImpl implements AuthService {
         cookie.setPath("/");
         cookie.setMaxAge(0);
         cookie.setAttribute("SameSite", cookieSameSite);
+        cookie.setAttribute("Partitioned", "");
 
         response.addCookie(cookie);
     }
