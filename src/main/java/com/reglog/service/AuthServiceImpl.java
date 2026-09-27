@@ -41,10 +41,16 @@ public class AuthServiceImpl implements AuthService {
     @Value("${jwt.expiration}")
     private long expirationMillis;
 
+    @Value("${jwt.cookie-secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${jwt.cookie-same-site:Lax}")
+    private String cookieSameSite;
+
     public AuthServiceImpl(UserRepository userRepository,
-                           JwtTokenRepository jwtTokenRepository,
-                           PasswordEncoder passwordEncoder,
-                           JwtUtil jwtUtil) {
+            JwtTokenRepository jwtTokenRepository,
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtTokenRepository = jwtTokenRepository;
         this.passwordEncoder = passwordEncoder;
@@ -106,27 +112,31 @@ public class AuthServiceImpl implements AuthService {
      *
      * - HttpOnly: the React app cannot read the token from JavaScript.
      * - Secure=false: required because we are on plain HTTP localhost.
-     *   In production with HTTPS, set Secure to true.
+     * In production with HTTPS, set Secure to true.
      * - SameSite=Lax: allows the cookie to be sent on same-site requests
-     *   (localhost:5173 -> localhost:8080 counts as same-site).
+     * (localhost:5173 -> localhost:8080 counts as same-site).
      */
     private void addJwtCookie(HttpServletResponse response, String token, int maxAgeSeconds) {
         Cookie cookie = new Cookie(cookieName, token);
+
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", cookieSameSite);
+
         response.addCookie(cookie);
     }
 
     private void clearJwtCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(cookieName, "");
+
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/");
-        cookie.setMaxAge(0); // delete immediately
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setMaxAge(0);
+        cookie.setAttribute("SameSite", cookieSameSite);
+
         response.addCookie(cookie);
     }
 }
